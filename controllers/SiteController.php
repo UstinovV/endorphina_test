@@ -2,8 +2,10 @@
 
 namespace app\controllers;
 
+use app\models\PlayForm;
 use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
@@ -125,4 +127,23 @@ class SiteController extends Controller
     {
         return $this->render('about');
     }
+
+	public function actionPlay()
+	{
+		if (Yii::$app->user->isGuest) {
+			return $this->goHome();
+		}
+//		VarDumper::dump(Yii::$app->user->getId());
+		$form = new PlayForm();
+
+		if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+			// valid data received in $model
+
+
+			return $this->render('play_result', ['form' => $form]);
+		} else {
+			// either the page is initially displayed or there is some validation error
+			return $this->render('play_form', ['form' => $form]);
+		}
+	}
 }
