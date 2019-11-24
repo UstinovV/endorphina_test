@@ -1,7 +1,7 @@
 version: '2'
 services:
   db:
-    image: mysql:5.7
+    image: mysql
     ports:
           - "3336:3306"
     container_name: endorphina_db
