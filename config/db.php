@@ -2,7 +2,7 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=endorphina_mariadb;dbname=endorphina',
+    'dsn' => 'mysql:host=endorphina_db;dbname=endorphina',
     'username' => 'endorphina',
     'password' => '123qwe',
     'charset' => 'utf8',

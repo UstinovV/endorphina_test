@@ -11,6 +11,9 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\Item;
+use app\models\Money;
+use app\models\Bonus;
 
 class SiteController extends Controller
 {
@@ -132,18 +135,41 @@ class SiteController extends Controller
 	{
 		if (Yii::$app->user->isGuest) {
 			return $this->goHome();
-		}
-//		VarDumper::dump(Yii::$app->user->getId());
+        }
+        Yii::$app->user->getId()
 		$form = new PlayForm();
-
-		if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-			// valid data received in $model
-
-
-			return $this->render('play_result', ['form' => $form]);
+        
+		if (Yii::$app->request->isAjax) {
+            $priseType = rand(1,3);
+            switch ($priseType) {
+                case 1:
+                    $moneyAmount = rand(1,1000);
+                    Yii::$app->db->createCommand('UPDATE `user_money` set `amount` = `amount` + '.$moneyAmount.'');
+                    return 'Money '.$moneyAmount;
+                break;
+                case 2:
+                    $bonusAmount = rand(1,1000);
+                    Yii::$app->db->createCommand('UPDATE `user_bonus` set `amount` = `amount` + '.$bonusAmount.'');
+                    return 'Bonus '.$bonusAmount;
+                break;
+                case 3:
+                try{
+                    $item = Yii::$app->db->createCommand('SELECT `title` FROM `items` ORDER BY RAND()')
+                        ->queryOne();
+                } catch (Exception $e) {
+                    return $e->getMessage();
+                }
+                    return $item;
+                break;
+            }
+		
 		} else {
-			// either the page is initially displayed or there is some validation error
 			return $this->render('play_form', ['form' => $form]);
 		}
-	}
+    }
+    
+    public function actionSave()
+	{
+        return "";
+    }
 }
