@@ -1,7 +1,7 @@
 version: '2'
 services:
   db:
-    image: mysql
+    image: mysql:5.7
     ports:
           - "3336:3306"
     container_name: endorphina_db
@@ -14,7 +14,7 @@ services:
       - MYSQL_DATABASE=endorphina
       - MYSQL_USER=endorphina
       - MYSQL_PASSWORD=123qwe
-    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    command: mysqld --disable-partition-engine-check --character-set-server=utf8 --collation-server=utf8_unicode_ci 
   php:
     image: yiisoftware/yii2-php:7.1-apache
     volumes:
