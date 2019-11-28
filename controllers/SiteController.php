@@ -136,20 +136,27 @@ class SiteController extends Controller
 		if (Yii::$app->user->isGuest) {
 			return $this->goHome();
         }
-        Yii::$app->user->getId()
+        $userId = Yii::$app->user->getId();
 		$form = new PlayForm();
-        
+		$connection = \Yii::$app->db;
+		$connection->open();
+		$command = $connection->createCommand('SELECT * FROM user_money');
+		$posts = $command->queryAll();
+
+
 		if (Yii::$app->request->isAjax) {
             $priseType = rand(1,3);
+
+
             switch ($priseType) {
                 case 1:
                     $moneyAmount = rand(1,1000);
-                    Yii::$app->db->createCommand('UPDATE `user_money` set `amount` = `amount` + '.$moneyAmount.'');
+                    Yii::$app->db->createCommand('UPDATE `user_money` set `amount` = `amount` + '.$moneyAmount.' WHERE user_id = '.$userId);
                     return 'Money '.$moneyAmount;
                 break;
                 case 2:
                     $bonusAmount = rand(1,1000);
-                    Yii::$app->db->createCommand('UPDATE `user_bonus` set `amount` = `amount` + '.$bonusAmount.'');
+                    Yii::$app->db->createCommand('UPDATE `user_bonus` set `amount` = `amount` + '.$bonusAmount.' WHERE user_id = '.$userId);
                     return 'Bonus '.$bonusAmount;
                 break;
                 case 3:
@@ -157,6 +164,7 @@ class SiteController extends Controller
                     $item = Yii::$app->db->createCommand('SELECT `title` FROM `items` ORDER BY RAND()')
                         ->queryOne();
                 } catch (Exception $e) {
+                	die($e->getMessage());
                     return $e->getMessage();
                 }
                     return $item;
