@@ -3,7 +3,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 ?>
 
-<?php $form = ActiveForm::begin(['action'=>'/site/play']) ?>
+<?php $form = ActiveForm::begin(['action'=>'/site/save']) ?>
 <div>
 	<span>User money: </span>
 	<span id="user-money-amount"></span>
@@ -15,14 +15,14 @@ use yii\widgets\ActiveForm;
 <?= Html::tag('p', Html::encode('Press the button and win a prise')) ?>
 <?= Html::submitButton('Play', ['class' => 'btn btn-success']) ?>
 <?php ActiveForm::end() ?>
+<br>
+<p>Convert money to bonuses</p>
+<button class="btn btn-primary" id="convert-button">Convert</button>
 
 <?php
 $js = <<<JS
-$( document ).ready(function() {
-    $('#user-money-amount').text('0');
-    $('#user-bonuses-amount').text('0');
-    
-     $.ajax({
+function refreshUSerData() {
+    $.ajax({
 		 url: '/site/get-user-data',
 		 type: 'POST',
 		 data: [],
@@ -36,25 +36,52 @@ $( document ).ready(function() {
 			console.log(err.statusText);
 		 }
 	 });
+}
+
+$( document ).ready(function() {
+    $('#user-money-amount').text('0');
+    $('#user-bonuses-amount').text('0');
+    refreshUSerData();
 });
 
 $('form').on('beforeSubmit', function(){
- var data = $(this).serialize();
- $.ajax({
- url: '/site/play',
- type: 'POST',
- data: [],
- success: function(res){
-    console.log(res);
- },
- error: function(err){
-    alert('Error happened');
-	console.log(err.responseText);
-	console.log(err.statusText);
- }
- });
- return false;
- });
+let data = $(this).serialize();
+    $.ajax({
+        url: '/site/play',
+        type: 'POST',
+        data: [],
+        success: function(res){
+            alert('Your prise is: ' + res);
+            // as option could refreshed without additional request
+            refreshUSerData();
+        },
+        error: function(err){
+            alert('Error happened');
+            console.log(err.responseText);
+            console.log(err.statusText);
+        }
+    });
+    return false;
+});
+
+$('#convert-button').on('click', function(){
+    $.ajax({
+        url: '/site/convert',
+        type: 'POST',
+        data: [],
+        success: function(res){
+            alert('Your prise is: ' + res);
+            // as option could refreshed without additional request
+            refreshUSerData();
+        },
+        error: function(err){
+            alert('Error happened');
+            console.log(err.responseText);
+            console.log(err.statusText);
+        }
+    });
+});
+
 JS;
  
 $this->registerJs($js);

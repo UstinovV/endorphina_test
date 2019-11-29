@@ -136,9 +136,10 @@ class SiteController extends Controller
 		if (Yii::$app->user->isGuest) {
 			return $this->goHome();
         }
-        $userId = Yii::$app->user->getId();
+
         $form = new PlayForm();
-        
+
+        $userId = Yii::$app->user->getId();
 		$connection = \Yii::$app->db;
 
 		if (Yii::$app->request->isAjax) {
@@ -148,12 +149,29 @@ class SiteController extends Controller
             switch ($priseType) {
                 case 1:
                     $moneyAmount = rand(1,1000);
-                    $connection->createCommand('UPDATE `user_money` set `amount` = `amount` + '.$moneyAmount.' WHERE user_id = '.$userId)->execute();
+                    $money = Money::findOne(['user_id' => $userId]);
+                    if ($money) {
+                        $money->amount = $money->amount + $moneyAmount;
+                    } else {
+                        $money = new Money();
+                        $money->amount = $moneyAmount;
+                        $money->user_id = $userId;
+                    }
+                    $money->save();
                     return 'Money '.$moneyAmount;
                 break;
                 case 2:
                     $bonusAmount = rand(1,1000);
-                    $connection->createCommand('UPDATE `user_bonuses` set `amount` = `amount` + '.$bonusAmount.' WHERE user_id = '.$userId)->execute();
+                    $bonus = Bonus::findOne(['user_id' => $userId]);
+                    if ($bonus) {
+                        $bonus->amount = $bonus->amount + $bonusAmount;
+                    } else {
+                        $bonus = new Money();
+                        $bonus->amount = $bonusAmount;
+                        $bonus->user_id = $userId;
+                    }
+                    $bonus->save();
+
                     return 'Bonus '.$bonusAmount;
                 break;
                 case 3:
@@ -167,16 +185,10 @@ class SiteController extends Controller
 			return $this->render('play_form', ['form' => $form]);
 		}
     }
-    
-    public function actionSave()
-	{
-        return "";
-    }
 
 	public function actionGetUserData()
 	{
 		if (Yii::$app->request->isAjax) {
-			$data = [];
 
 			$result = \Yii::$app->db->createCommand('SELECT m.amount as money, b.amount as bonuses FROM `user_money` m LEFT JOIN `user_bonuses` b on m.user_id = b.user_id where m.user_id = '.Yii::$app->user->getId())
 				->queryOne();
@@ -184,4 +196,42 @@ class SiteController extends Controller
 			return $this->asJson($result);
 		}
 	}
+
+
+    public function actionConvert()
+    {
+        if (Yii::$app->request->isAjax) {
+            $data = [];
+
+            $userId = Yii::$app->user->getId();
+
+            //could be stored in config/db/etc...
+            $coefficient = 1.5;
+            $money = Money::findOne(['user_id' => $userId]);
+            $amountToConvert = 0;
+            if ($money) {
+                $amountToConvert = $money->amount;
+                $money->amount = 0;
+            } else {
+                $bonus = new Money();
+                $bonus->amount = 0;
+                $bonus->user_id = $userId;
+            }
+
+            $amountToConvert *= $coefficient;
+
+            $bonus = Bonus::findOne(['user_id' => $userId]);
+            if ($bonus) {
+                $bonus->amount = $bonus->amount + $amountToConvert;
+            } else {
+                $bonus = new Money();
+                $bonus->amount = $amountToConvert;
+                $bonus->user_id = $userId;
+            }
+            $bonus->save();
+            $money->save();
+
+            return 'Successfully converted '. $amountToConvert. ' bonuses';
+        }
+    }
 }
