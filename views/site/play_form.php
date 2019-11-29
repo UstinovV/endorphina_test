@@ -17,10 +17,13 @@ $('form').on('beforeSubmit', function(){
  type: 'POST',
  data: [],
  success: function(res){
- console.log(res);
+    console.log(res);
  },
  error: function(err){
- alert(err);
+    var keys = Object.keys(err);
+    console.log(keys);
+    alert(err.responseText);
+    console.log(err.statusText);
  }
  });
  return false;
