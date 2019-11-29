@@ -14,3 +14,4 @@ INSERT INTO `user_bonuses` (user_id, amount) values (102, 0);
 INSERT INTO `user_money` (user_id, amount) values (100, 0);
 INSERT INTO `user_money` (user_id, amount) values (101, 0);
 INSERT INTO `user_money` (user_id, amount) values (102, 0);
+

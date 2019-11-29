@@ -140,8 +140,6 @@ class SiteController extends Controller
         $form = new PlayForm();
         
 		$connection = \Yii::$app->db;
-		$connection->open();
-
 
 		if (Yii::$app->request->isAjax) {
             $priseType = rand(1,3);
@@ -174,4 +172,16 @@ class SiteController extends Controller
 	{
         return "";
     }
+
+	public function actionGetUserData()
+	{
+		if (Yii::$app->request->isAjax) {
+			$data = [];
+
+			$result = \Yii::$app->db->createCommand('SELECT m.amount as money, b.amount as bonuses FROM `user_money` m LEFT JOIN `user_bonuses` b on m.user_id = b.user_id where m.user_id = '.Yii::$app->user->getId())
+				->queryOne();
+
+			return $this->asJson($result);
+		}
+	}
 }
